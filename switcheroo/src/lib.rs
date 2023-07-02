@@ -31,6 +31,7 @@
 mod arch;
 pub mod stack;
 
+use std::rc::Rc;
 use std::any::Any;
 use std::cell::Cell;
 use std::marker::PhantomData;
@@ -94,7 +95,7 @@ where
             let f = std::ptr::read(f_ptr as *const F);
             let (data, stack_ptr) = arch::swap(0, stack_ptr);
             let input = std::ptr::read(data as *const Input);
-            let yielder = Yielder::new(stack_ptr);
+            let yielder = Rc::new(Yielder::new(stack_ptr));
 
             // It is not safe to unwind across the context switch.
             // The unwind will continue in the original context.
