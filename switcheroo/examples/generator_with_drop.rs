@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use switcheroo::Generator;
 use switcheroo::{stack::*, Yielder};
 
@@ -11,7 +13,7 @@ impl Drop for DropMarker {
 
 fn main() {
     let stack = EightMbStack::new().unwrap();
-    let mut add_one = Generator::new(stack, |yielder: &Yielder<i32, i32>, mut input| {
+    let mut add_one = Generator::new(stack, |yielder: &Rc<Yielder<i32, i32>>, mut input| {
         let _marker = DropMarker {};
         input = yielder.suspend(input + 1);
         input = yielder.suspend(input + 1);
