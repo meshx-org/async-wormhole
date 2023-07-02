@@ -78,7 +78,7 @@ where
     /// Create a new generator from a stack and closure.
     pub fn new<F>(stack: Stack, f: F) -> Generator<'a, Input, Output, Stack>
     where
-        F: FnOnce(&Rc<Yielder<Input, Output>>, Input) + 'a,
+        F: FnOnce(*const Yielder<Input, Output>, Input) + 'a,
     {
         // This function will be written to the new stack (by `arch::init`) as the initial
         // entry point. During the `arch::swap_and_link_stacks` call it will be called with
@@ -90,12 +90,12 @@ where
             stack_ptr: *mut usize,
         ) where
             Stack: stack::Stack,
-            F: FnOnce(&Rc<Yielder<Input, Output>>, Input),
+            F: FnOnce(*const Yielder<Input, Output>, Input),
         {
             let f = std::ptr::read(f_ptr as *const F);
             let (data, stack_ptr) = arch::swap(0, stack_ptr);
             let input = std::ptr::read(data as *const Input);
-            let yielder = Rc::new(Yielder::new(stack_ptr));
+            let yielder = Yielder::new(stack_ptr);
 
             // It is not safe to unwind across the context switch.
             // The unwind will continue in the original context.
